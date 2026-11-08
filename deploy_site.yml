@@ -1,0 +1,60 @@
+---
+- name: Deploy Apache web server in Docker
+  hosts: apache
+  gather_facts: true
+
+  vars:
+    student_number: "2293142387"
+    image_name: "apache_2293142387"
+    container_name: "httpd_2293142387"
+    host_port: 8090
+    build_dir: "/home/devasc/2293142387_apache"
+
+  tasks:
+    - name: Create build directory
+      file:
+        path: "{{ build_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Generate index.html from template
+      template:
+        src: templates/index.html.j2
+        dest: "{{ build_dir }}/index.html"
+        mode: '0644'
+
+    - name: Create Dockerfile
+      copy:
+        dest: "{{ build_dir }}/Dockerfile"
+        content: |
+          FROM httpd:alpine
+          COPY ./index.html /usr/local/apache2/htdocs/index.html
+          EXPOSE 80
+        mode: '0644'
+
+    - name: Build Docker image
+      command: docker build -t {{ image_name }} {{ build_dir }}
+
+    - name: Remove existing container if present
+      command: docker rm -f {{ container_name }}
+      failed_when: false
+      changed_when: false
+
+    - name: Run Apache container
+      command: >
+        docker run -d --name {{ container_name }}
+        -p {{ host_port }}:80 {{ image_name }}
+
+    - name: Check that the website responds
+      uri:
+        url: "http://localhost:{{ host_port }}"
+        status_code: 200
+        return_content: true
+      register: web_check
+      until: web_check.status == 200
+      retries: 5
+      delay: 3
+
+    - name: Show HTTP status
+      debug:
+        msg: "Website responded with status {{ web_check.status }}"

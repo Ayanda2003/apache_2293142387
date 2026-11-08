@@ -1,0 +1,35 @@
+
+PLAY [Deploy Apache web server in Docker] ***********************************************
+
+TASK [Gathering Facts] ******************************************************************
+ok: [localhost]
+
+TASK [Create build directory] ***********************************************************
+ok: [localhost]
+
+TASK [Generate index.html from template] ************************************************
+ok: [localhost]
+
+TASK [Create Dockerfile] ****************************************************************
+ok: [localhost]
+
+TASK [Build Docker image] ***************************************************************
+changed: [localhost]
+
+TASK [Remove existing container if present] *********************************************
+ok: [localhost]
+
+TASK [Run Apache container] *************************************************************
+changed: [localhost]
+
+TASK [Check that the website responds] **************************************************
+ok: [localhost]
+
+TASK [Show HTTP status] *****************************************************************
+ok: [localhost] => {
+    "msg": "Website responded with status 200"
+}
+
+PLAY RECAP ******************************************************************************
+localhost                  : ok=9    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
